@@ -1,4 +1,5 @@
 import copy
+from email.policy import default
 import sys
 
 from crossword import *
@@ -184,14 +185,67 @@ class CrosswordCreator():
         Return True if `assignment` is complete (i.e., assigns a value to each
         crossword variable); return False otherwise.
         """
-        raise NotImplementedError
+        print('inside assignment_complete')
+        result = True
+        # get all variables
+        variables = set(self.domains.keys())
+        print(f'variables: {variables}')
+        for v in variables:
+            # check if variable exists as key, value pair in assigment
+            if assignment.get(v) == None:
+                result = False
+        # return False otherwise
+        return result
 
     def consistent(self, assignment):
         """
         Return True if `assignment` is consistent (i.e., words fit in crossword
         puzzle without conflicting characters); return False otherwise.
         """
-        raise NotImplementedError
+        print('inside consistent')
+        print(f'assignment: {assignment}')
+        result = True
+        # are all values distinct?
+        for v1, e1 in assignment.items():
+            for v2, e2 in assignment.items():
+                if v1 == v2:
+                    continue
+                if e1 == e2:
+                    result = False
+
+        # is every value of correct length?
+        for v, e in assignment.items():
+            if v.length != len(e):
+                result = False
+
+        # are there no conflicts between neighbouring variables?
+        neighbours = list()
+        edges = self.crossword.overlaps
+        print(f'overlaps: {edges}')
+
+        for vars, overlap in edges.items():
+            # step through all overlaps
+            if overlap != None:
+                # check if overlap exists in assignment
+                for a1 in assignment.keys():
+                    for a2 in assignment.keys():
+                        if a1 != a2:
+                            if a1 == vars[0] and a2 == vars[2]:
+                                # there is a neighbour
+                                assigned_word = assignment[a1]
+                                neighbour_word = assignment[a2]
+                                i_assigned = overlap[0]
+                                i_neighbour = overlap[1]
+                                print(f'assigned_word: {assigned_word}')
+                                print(f'neighbour_word: {neighbour_word}')
+                                print(f'i_assinged: {i_assigned}')
+                                print(f'i_neighbour: {i_neighbour}')
+                                # check if the overlap is matching
+                                if assigned_word[i_assigned] != neighbour_word[i_neighbour]:
+                                    # conflict with neighbouring value
+                                    result = False
+
+        return result
 
     def order_domain_values(self, var, assignment):
         """
@@ -200,7 +254,8 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        raise NotImplementedError
+        print('inside order_domain_values')
+        return self.domains[var]
 
     def select_unassigned_variable(self, assignment):
         """
@@ -210,7 +265,17 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        raise NotImplementedError
+        print('inside select_unassigned_variable')
+        # get all variables
+        variables = set(self.domains.keys())
+        for v in variables:
+            if v not in assignment:
+                # return a variable not yet assigned
+                return v
+
+        # all variables assigned
+        return None
+
 
     def backtrack(self, assignment):
         """
@@ -221,7 +286,25 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
-        raise NotImplementedError
+        print('inside backtrack')
+
+        # if assignment is complete, return assignment
+        if self.assignment_complete(assignment):
+            print('assignment complete')
+            return assignment
+        print('assignment not complete')
+
+        # select an unassigned variable
+        var = self.select_unassigned_variable(assignment)
+        print(f'var: {var}')
+
+        # step through the domain values for the var
+        for value in self.order_domain_values(var, assignment):
+            print(f'domain value: {value}')
+            # is value consistent with assignment?
+            assignment[var] = value
+            consistent = self.consistent(assignment)
+            print(f'consistent: {consistent}')
 
 
 def main():
