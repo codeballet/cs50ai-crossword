@@ -116,7 +116,33 @@ class CrosswordCreator():
         Return True if a revision was made to the domain of `x`; return
         False if no revision was made.
         """
-        raise NotImplementedError
+        revised = False
+        # get indexes of overlap between x and y
+        x_index, y_index = self.crossword.overlaps[x, y]
+
+        # a set of values to delete from x's domain
+        to_delete = set()
+
+        for x_word in self.domains[x]:
+            satisfied = False
+            # check if there is a possible corresponing value in y's domain
+            for y_word in self.domains[y]:
+                if x_word[x_index] == y_word[y_index]:
+                    # overlap found, restriction satisfied
+                    satisfied = True
+                    break
+            if not satisfied:
+                # add word to delete from x's domain
+                to_delete.add(x_word)
+                # mark as revised
+                revised = True
+
+        if revised:
+            # make x arc consistent with y by deleting words
+            for word in to_delete:
+                self.domains[x].remove(word)
+                    
+        return revised
 
     def ac3(self, arcs=None):
         """
@@ -127,7 +153,31 @@ class CrosswordCreator():
         Return True if arc consistency is enforced and no domains are empty;
         return False if one or more domains end up empty.
         """
-        raise NotImplementedError
+        if arcs == None:
+            # create queue of all arcs
+            arcs = list()
+            edges = self.crossword.overlaps
+            for vars, overlap in edges.items():
+                if overlap != None:
+                    arcs.append(vars)
+
+        if len(arcs) != 0:
+            arc = arcs.pop()
+            x, y = arc
+            if self.revise(x, y):
+                # domain of x arc-consistent in relation to y
+                if len(self.domains[x]) == 0:
+                    # x's domain is empty, problem cannot be solved
+                    return False
+                # for each neighbour z to x, apart from y, add (z,x) to queue
+                for arc in arcs:
+                    if arc[0] == x and arc[1] != y:
+                        arcs.append((arc[1], arc[0]))
+            # recursively call function
+            self.ac3(arcs)
+        # queue empty, arc consistency enforced
+        return True
+            
 
     def assignment_complete(self, assignment):
         """
