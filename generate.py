@@ -230,7 +230,7 @@ class CrosswordCreator():
                 for a1 in assignment.keys():
                     for a2 in assignment.keys():
                         if a1 != a2:
-                            if a1 == vars[0] and a2 == vars[2]:
+                            if a1 == vars[0] and a2 == vars[1]:
                                 # there is a neighbour
                                 assigned_word = assignment[a1]
                                 neighbour_word = assignment[a2]
@@ -298,13 +298,21 @@ class CrosswordCreator():
         var = self.select_unassigned_variable(assignment)
         print(f'var: {var}')
 
-        # step through the domain values for the var
+        # step through the domain values for the variable
         for value in self.order_domain_values(var, assignment):
             print(f'domain value: {value}')
-            # is value consistent with assignment?
+            # add to assignment and check if consistent
             assignment[var] = value
-            consistent = self.consistent(assignment)
-            print(f'consistent: {consistent}')
+            if self.consistent(assignment):
+                # recursively call backtrack function
+                result = self.backtrack(assignment)
+                if result != None:
+                    # assignment completed
+                    return result
+            # domain value not consistent, remove from assignment
+            del assignment[var]
+
+        return None
 
 
 def main():
