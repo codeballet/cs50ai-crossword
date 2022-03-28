@@ -189,10 +189,9 @@ class CrosswordCreator():
         # get all variables
         variables = set(self.domains.keys())
         for v in variables:
-            # check if variable exists as key, value pair in assigment
             if assignment.get(v) == None:
+                # assignment incomplete
                 result = False
-        # return False otherwise
         return result
 
     def consistent(self, assignment):
@@ -201,7 +200,8 @@ class CrosswordCreator():
         puzzle without conflicting characters); return False otherwise.
         """
         result = True
-        # are all values distinct?
+
+        # check if all words are distinct
         for v1, e1 in assignment.items():
             for v2, e2 in assignment.items():
                 if v1 == v2:
@@ -209,29 +209,29 @@ class CrosswordCreator():
                 if e1 == e2:
                     result = False
 
-        # is every value of correct length?
+        # check if every word is of correct length
         for v, e in assignment.items():
             if v.length != len(e):
                 result = False
 
-        # are there no conflicts between neighbouring variables?
+        # check for conflicts between neighbouring words
         edges = self.crossword.overlaps
         for vars, overlap in edges.items():
-            # step through all overlaps
+            # step through all existing overlaps
             if overlap != None:
-                # check if overlap exists in assignment
+                # find overlap in assignment
                 for a1 in assignment.keys():
                     for a2 in assignment.keys():
                         if a1 != a2:
                             if a1 == vars[0] and a2 == vars[1]:
-                                # there is a neighbour
+                                # neighbour overlap found
                                 assigned_word = assignment[a1]
                                 neighbour_word = assignment[a2]
                                 i_assigned = overlap[0]
                                 i_neighbour = overlap[1]
-                                # check if the overlap is matching
+                                # check if overlap in assignment matches
                                 if assigned_word[i_assigned] != neighbour_word[i_neighbour]:
-                                    # conflict with neighbouring value
+                                    # conflict found
                                     result = False
 
         return result
