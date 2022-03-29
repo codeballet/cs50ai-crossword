@@ -158,8 +158,7 @@ class CrosswordCreator():
         if arcs == None:
             # create queue of all arcs
             arcs = list()
-            edges = self.crossword.overlaps
-            for vars, overlap in edges.items():
+            for vars, overlap in self.crossword.overlaps.items():
                 if overlap != None:
                     arcs.append(vars)
 
@@ -235,8 +234,18 @@ class CrosswordCreator():
                                 if assigned_word[i_assigned] != neighbour_word[i_neighbour]:
                                     # conflict found
                                     result = False
-
+        
         return result
+
+    def inference(self, assignment):
+        print('inside inference')
+        # For a new assignment to X, 
+        # create an arcs list (Y,X) 
+        # where Y is a neighbour of X
+
+        inferences = 0
+
+        
 
     def order_domain_values(self, var, assignment):
         """
@@ -342,12 +351,18 @@ class CrosswordCreator():
             # add to assignment and check if consistent
             assignment[var] = value
             if self.consistent(assignment):
+                # add inference with ac3
+                inferences = self.inference(assignment)
+                # if inference ok, add inferences to assignment
+
                 # recursively call backtrack function
                 result = self.backtrack(assignment)
                 if result != None:
                     # assignment completed
                     return result
             # domain value not consistent, remove from assignment
+            # also remove inferences
+
             del assignment[var]
         # failed to find solution
         return None
