@@ -2,6 +2,7 @@ from cmath import inf
 import copy
 from email.policy import default
 import sys
+from xml import dom
 
 from crossword import *
 
@@ -285,16 +286,40 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        # get all variables
-        variables = set(self.domains.keys())
-        for v in variables:
-            if v not in assignment:
-                # return a variable not yet assigned
-                return v
+        # get variables and domain lengths, not in assignment
+        vars_list = list()
+        domain_list = list()
+        for variable, domain in self.domains.items():
+            if variable not in assignment:
+                vars_list.append(variable)
+                domain_list.append(len(domain))
 
-        # all variables assigned
-        return None
+        # smallest domain size
+        d_min = min(domain_list)
 
+        # collect variables with smallest domain
+        indexes = [i for i, n in enumerate(domain_list) if n == d_min]
+        vars_smallest = [vars_list[i] for i in indexes]
+
+        if len(vars_smallest) == 1:
+            # no tie, only one variable available
+            return vars_smallest[0]        
+
+        # tie, get neighbours for each variable
+        neighbours = dict()
+        for var in vars_smallest:
+            # set counter
+            n = 0
+            for vars in self.crossword.overlaps.keys():
+                if vars[0] == var:
+                    # neighbour found
+                    n += 1
+            neighbours[var] = n
+
+        # sort variables according to degree
+        vars_degree = sorted(neighbours, key=lambda n: neighbours[n])
+
+        return vars_degree[0]
 
     def backtrack(self, assignment):
         """
