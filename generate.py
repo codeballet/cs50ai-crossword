@@ -1,3 +1,4 @@
+from cmath import inf
 import copy
 from email.policy import default
 import sys
@@ -243,7 +244,41 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        return self.domains[var]
+        # dict for how many choices are eliminated for each word
+        word_elimination = dict()
+        # dict for the sorted domain of var
+        sorted_domain = dict()
+
+        # get neighbours not already assigned
+        neighbours = dict()
+        edges = self.crossword.overlaps
+        for vars, overlap in edges.items():
+            if overlap != None and vars[0] == var and vars[1] not in assignment:
+                neighbours[vars[1]] = overlap
+
+        # count how many choices each word eliminates for neighbours
+        if len(neighbours) != 0:
+            # step through the domain of words for var
+            for var_word in self.domains[var]:
+                # set counter for number of restrictions
+                n = 0
+                for neighbour, overlap in neighbours.items():
+                    # get each neighbour's domain
+                    neighbour_domain = self.domains[neighbour]
+                    for neighbour_word in neighbour_domain:
+                        # check if var's word matches neighbour's word
+                        if var_word[overlap[0]] != neighbour_word[overlap[1]]:
+                            # restriction not satisfied, increase counter
+                            n += 1
+                # update minimum count and best word
+                word_elimination[var_word] = n
+            # sort var's domain
+            sorted_domain = sorted(word_elimination, key=lambda word: word_elimination[word])
+        else:
+            # no relevant neighbours, no sorting necessary
+            sorted_domain = self.domains[var]
+
+        return sorted_domain
 
     def select_unassigned_variable(self, assignment):
         """
