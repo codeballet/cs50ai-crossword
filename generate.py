@@ -244,9 +244,9 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        # dict for how many choices are eliminated for each word
+        # dict for how many choices are eliminated for each word of var
         word_elimination = dict()
-        # dict for the sorted domain of var
+        # dict for the sorted domain of var to return
         sorted_domain = dict()
 
         # get neighbours not already assigned
@@ -258,7 +258,6 @@ class CrosswordCreator():
 
         # count how many choices each word eliminates for neighbours
         if len(neighbours) != 0:
-            # step through the domain of words for var
             for var_word in self.domains[var]:
                 # set counter for number of restrictions
                 n = 0
@@ -270,9 +269,7 @@ class CrosswordCreator():
                         if var_word[overlap[0]] != neighbour_word[overlap[1]]:
                             # restriction not satisfied, increase counter
                             n += 1
-                # update minimum count and best word
                 word_elimination[var_word] = n
-            # sort var's domain
             sorted_domain = sorted(word_elimination, key=lambda word: word_elimination[word])
         else:
             # no relevant neighbours, no sorting necessary
