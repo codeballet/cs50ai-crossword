@@ -216,8 +216,7 @@ class CrosswordCreator():
                 result = False
 
         # check for conflicts between neighbouring words
-        edges = self.crossword.overlaps
-        for vars, overlap in edges.items():
+        for vars, overlap in self.crossword.overlaps.items():
             # step through all existing overlaps
             if overlap != None:
                 # find overlap in assignment
@@ -239,13 +238,33 @@ class CrosswordCreator():
 
     def inference(self, assignment):
         print('inside inference')
-        # For a new assignment to X, 
-        # create an arcs list (Y,X) 
-        # where Y is a neighbour of X
+        """
+        For a new assignment to X, 
+        create an arcs list (Y,X) 
+        where Y is a neighbour of X
+        """
+        print(f'assignment: {assignment}')
+        # for every var in assignment, find all neighbours to var
+        for var in assignment:
+            # create an arcs list
+            arcs = list()
+            for neighbour in self.crossword.neighbors(var):
+                arcs.append((neighbour, var))
 
-        inferences = 0
+            # call ac-3 with arcs list
+            result = self.ac3(arcs)
+            print(f'ac3 result: {result}')
 
-        
+        # get variables not in assignment with only one domain value
+        inference = dict()
+        for var, domain in self.domains.items():
+            if var not in assignment and len(domain) == 1:
+                # found inferred {variable: value}
+                inference[var] = domain.pop()
+
+        print(f'inference: {inference}')
+
+        return inference
 
     def order_domain_values(self, var, assignment):
         """
@@ -261,8 +280,7 @@ class CrosswordCreator():
 
         # get neighbours not already assigned
         neighbours = dict()
-        edges = self.crossword.overlaps
-        for vars, overlap in edges.items():
+        for vars, overlap in self.crossword.overlaps.items():
             if overlap != None and vars[0] == var and vars[1] not in assignment:
                 neighbours[vars[1]] = overlap
 
@@ -346,6 +364,8 @@ class CrosswordCreator():
         # select an unassigned variable
         var = self.select_unassigned_variable(assignment)
 
+        inferences = dict()
+
         # step through the domain values for the variable
         for value in self.order_domain_values(var, assignment):
             # add to assignment and check if consistent
@@ -353,17 +373,24 @@ class CrosswordCreator():
             if self.consistent(assignment):
                 # add inference with ac3
                 inferences = self.inference(assignment)
-                # if inference ok, add inferences to assignment
-
+                # add inferences to assignment
+                for inferred, word in inferences.items():
+                    print(f'inferred, word: {inferred}, {word}')
+                    assignment[inferred] = word
+                if value not in self.order_domain_values(var, assignment):
+                    # inference deleted the value
+                    del assignment[var]
+                    break
                 # recursively call backtrack function
                 result = self.backtrack(assignment)
                 if result != None:
                     # assignment completed
                     return result
-            # domain value not consistent, remove from assignment
-            # also remove inferences
-
+            # if domain value not consistent, remove from assignment
             del assignment[var]
+            # also remove inferences
+            for inferred in inferences:
+                del assignment[inferred]
         # failed to find solution
         return None
 
