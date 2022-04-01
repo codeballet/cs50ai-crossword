@@ -344,8 +344,7 @@ class CrosswordCreator():
         inferences = dict()
 
         # step through the domain values for the variable
-        domain_values_copy = copy.deepcopy(self.order_domain_values(var, assignment))
-        for value in domain_values_copy:
+        for value in self.order_domain_values(var, assignment):
             # add to assignment and check if consistent
             assignment[var] = value
             if self.consistent(assignment):
