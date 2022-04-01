@@ -1,8 +1,15 @@
-# Crossword
+# Crossword introduction
 
 Crossword is an Artificial Intelligence that generates crossword puzzles.
 
 Giving the AI one file containing a library of words, and another file containing the desired structure of the crossword, the AI will figure out whether it is possible or not to generate a crossword with the given data. If possible, a crossword will be generated.
+
+The AI uses a backtrack algorithm, together with a number of optimizations and heuristics in order to solve the task quicker, including:
+
+- Unary Node Consistency is enforced before the backtrack algorithm runs.
+- Binary arc-consistency is enforced with an AC-3 algorithm before the backtrack algorithm runs.
+- Domain values for each variable (possible words) are ordered according to the least-constraining values heuristic.
+- Unassigned variables are evaluated according to: first, the minimum remaining value heuristic, and secondly, the degree heuristic.
 
 # Usage
 
