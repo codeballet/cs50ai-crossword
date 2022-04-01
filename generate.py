@@ -243,36 +243,6 @@ class CrosswordCreator():
         
         return result
 
-    def inference(self, assignment):
-        print('inside inference')
-        """
-        For a new assignment to X, 
-        create an arcs list (Y,X) 
-        where Y is a neighbour of X
-        """
-        print(f'assignment: {assignment}')
-        # for every var in assignment, find all neighbours to var
-        for var in assignment:
-            # create an arcs list
-            arcs = list()
-            for neighbour in self.crossword.neighbors(var):
-                arcs.append((neighbour, var))
-
-            # call ac-3 with arcs list
-            result = self.ac3(arcs)
-            print(f'ac3 result: {result}')
-
-        # get variables not in assignment with only one domain value
-        inference = dict()
-        for var, domain in self.domains.items():
-            if var not in assignment and len(domain) == 1:
-                # found inferred {variable: value}
-                inference[var] = domain.pop()
-
-        print(f'inference: {inference}')
-
-        return inference
-
     def order_domain_values(self, var, assignment):
         """
         Return a list of values in the domain of `var`, in order by
@@ -379,16 +349,6 @@ class CrosswordCreator():
             # add to assignment and check if consistent
             assignment[var] = value
             if self.consistent(assignment):
-                # # add inference with ac3
-                # inferences = self.inference(assignment)
-                # # add inferences to assignment
-                # for inferred, word in inferences.items():
-                #     print(f'inferred, word: {inferred}, {word}')
-                #     assignment[inferred] = word
-                # if value not in self.order_domain_values(var, assignment):
-                #     # inference deleted the value
-                #     del assignment[var]
-                #     break
                 # recursively call backtrack function
                 result = self.backtrack(assignment)
                 if result != None:
