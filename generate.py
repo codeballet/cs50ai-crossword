@@ -170,10 +170,17 @@ class CrosswordCreator():
                 if len(self.domains[x]) == 0:
                     # x's domain is empty, problem cannot be solved
                     return False
+
                 # for each neighbour z to x, excluding y, add (z,x) to queue
-                for arc in arcs:
-                    if arc[0] == x and arc[1] != y:
-                        arcs.append((arc[1], arc[0]))
+                neighbours = self.crossword.neighbors(x)
+                for n in neighbours:
+                    if n != y:
+                        arcs.append((n, x))
+
+                # for arc in arcs:
+                #     if arc[0] == x and arc[1] != y:
+                #         arcs.append((arc[1], arc[0]))
+
             # recursive call to function
             self.ac3(arcs)
 
@@ -367,20 +374,21 @@ class CrosswordCreator():
         inferences = dict()
 
         # step through the domain values for the variable
-        for value in self.order_domain_values(var, assignment):
+        domain_values_copy = copy.deepcopy(self.order_domain_values(var, assignment))
+        for value in domain_values_copy:
             # add to assignment and check if consistent
             assignment[var] = value
             if self.consistent(assignment):
-                # add inference with ac3
-                inferences = self.inference(assignment)
-                # add inferences to assignment
-                for inferred, word in inferences.items():
-                    print(f'inferred, word: {inferred}, {word}')
-                    assignment[inferred] = word
-                if value not in self.order_domain_values(var, assignment):
-                    # inference deleted the value
-                    del assignment[var]
-                    break
+                # # add inference with ac3
+                # inferences = self.inference(assignment)
+                # # add inferences to assignment
+                # for inferred, word in inferences.items():
+                #     print(f'inferred, word: {inferred}, {word}')
+                #     assignment[inferred] = word
+                # if value not in self.order_domain_values(var, assignment):
+                #     # inference deleted the value
+                #     del assignment[var]
+                #     break
                 # recursively call backtrack function
                 result = self.backtrack(assignment)
                 if result != None:
