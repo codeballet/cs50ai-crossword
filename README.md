@@ -4,7 +4,7 @@ Crossword is an Artificial Intelligence that generates crossword puzzles.
 
 Giving the AI one file containing a library of words, and another file containing the desired structure of the crossword, the AI will figure out whether it is possible or not to generate a crossword with the given data. If possible, a crossword will be generated.
 
-The AI uses a backtrack algorithm, together with a number of optimizations and heuristics in order to solve the task quicker, including:
+The main algorithm of the a AI is an instance of a Constraint Satisfaction Problem (CSR). More specificaly, it uses a Backtracking Search algorithm, together with a number of optimizations and heuristics in order to solve the task quicker, including:
 
 - Unary Node Consistency is enforced before the backtrack algorithm runs.
 - Binary Arc Consistency is enforced with an AC-3 algorithm before the backtrack algorithm runs.
